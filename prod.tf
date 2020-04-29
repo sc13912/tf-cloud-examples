@@ -4,7 +4,7 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "prod_tf_course" {
-  bucket = "sc13912-tf-course-202004"
+  bucket = "sc13912-tf-course-20200429-1400"
   acl	 = "private"
 }
 
@@ -39,8 +39,8 @@ resource "aws_security_group" "prod_web" {
 }
 
 resource "aws_instance" "prod_web" {
-  ami           = "ami-05fd71612cd6ba90a"
-  instance_type = "t2.nano"
+  ami           = "ami-06f46154d15644813"
+  instance_type = "t2.micro"
 
   vpc_security_group_ids = [
     aws_security_group.prod_web.id
