@@ -1,21 +1,3 @@
-variable "whitelist" {
-  type = list(string)
-}
-variable "web_image_id" {
-  type = string
-}
-variable "web_instance_type" {
-  type = string
-}
-variable "web_desired_capacity" {
-  type = number
-}
-variable "web_max_size" {
-  type = number
-}
-variable "web_min_size" {
-  type = number
-}
 
 provider "aws" {
   profile = "default"
@@ -23,7 +5,7 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "prod_tf_course" {
-  bucket = "sc13912-tf-course-20200430-1700"
+  bucket = "sc13912-tf-course-20200430-2000"
   acl	 = "private"
   tags = {
     "Terraform" : "True"
@@ -46,10 +28,35 @@ resource "aws_default_subnet" "default_az2" {
   }
 }
 
+resource "aws_default_security_group" "default"{
+  vpc_id = aws_default_vpc.default.id
+
+  ingress {
+    protocol  = -1
+    self      = true
+    from_port = 0
+    to_port   = 0
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 resource "aws_security_group" "prod_web" {
   name        = "prod_web"
-  description = "Allow standard http and https inbound and everything outbound"
-  
+  description = "Allow standard ssh, http and https inbound and everything outbound"
+
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = var.whitelist
+  }
   ingress {
     from_port   = 80
     to_port     = 80
@@ -83,6 +90,7 @@ module "web_app" {
   web_max_size          = var.web_max_size
   web_min_size          = var.web_min_size
   subnets               = [aws_default_subnet.default_az1.id,aws_default_subnet.default_az2.id]
-  security_groups       = [aws_security_group.prod_web.id]
+  security_groups       = [aws_security_group.prod_web.id,aws_default_security_group.default.id]
   web_app	 	= "prod"
+  key_name		= var.key_name
 }

@@ -16,9 +16,11 @@ resource "aws_elb" "this" {
 }
 
 resource "aws_launch_template" "this" {
-  name_prefix   = "${var.web_app}-web"
-  image_id      = var.web_image_id
-  instance_type = var.web_instance_type
+  name_prefix             = "${var.web_app}-web"
+  image_id                = var.web_image_id
+  instance_type           = var.web_instance_type
+  vpc_security_group_ids  = var.security_groups
+  key_name                = var.key_name
 
   tags = {
     "Terraform" : "True"
@@ -26,9 +28,9 @@ resource "aws_launch_template" "this" {
 }
 
 resource "aws_autoscaling_group" "this" {
-  availability_zones  = ["us-east-1a","us-east-1b"]
-  vpc_zone_identifier = var.subnets 
-  desired_capacity    = var.web_desired_capacity 
+  availability_zones  = ["us-east-1a", "us-east-1b"]
+  vpc_zone_identifier = var.subnets
+  desired_capacity    = var.web_desired_capacity
   max_size            = var.web_max_size
   min_size            = var.web_min_size
 
@@ -38,7 +40,7 @@ resource "aws_autoscaling_group" "this" {
   }
   tag {
     key                 = "Terraform"
-    value               = "true" 
+    value               = "true"
     propagate_at_launch = true
   }
 }

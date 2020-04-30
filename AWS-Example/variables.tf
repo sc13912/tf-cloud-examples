@@ -1,3 +1,6 @@
+variable "whitelist" {
+  type = list(string)
+}
 variable "web_image_id" {
   type = string
 }
@@ -13,18 +16,6 @@ variable "web_max_size" {
 variable "web_min_size" {
   type = number
 }
-variable "subnets" {
-  type = list(string)
-}
-variable "security_groups" {
-  type = list(string)
-}
-variable "web_app" {
-  type = string
-}
 variable "key_name" {
   type = string
 }
-
-
-

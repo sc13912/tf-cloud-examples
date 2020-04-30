@@ -5,5 +5,5 @@ provider "aws" {
 
 resource "aws_s3_bucket" "tf_course" {
   bucket = "sc13912-tf-course-20200429"
-  acl	 = "private"
+  acl    = "private"
 }
