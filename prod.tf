@@ -1,10 +1,31 @@
+variable "whitelist" {
+  type = list(string)
+}
+variable "web_image_id" {
+  type = string
+}
+variable "web_instance_type" {
+  type = string
+}
+variable "web_desired_capacity" {
+  type = number
+}
+variable "web_max_size" {
+  type = number
+}
+variable "web_min_size" {
+  type = number
+}
+
+
+
 provider "aws" {
   profile = "default"
   region  = "us-east-1"
 }
 
 resource "aws_s3_bucket" "prod_tf_course" {
-  bucket = "sc13912-tf-course-20200429-1500"
+  bucket = "sc13912-tf-course-20200430-1200"
   acl	 = "private"
   tags = {
     "Terraform" : "True"
@@ -35,19 +56,19 @@ resource "aws_security_group" "prod_web" {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = var.whitelist
   }
   ingress {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = var.whitelist
   }
   egress {
     from_port   = 0 
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = var.whitelist 
   }
 
   tags = {
@@ -74,8 +95,8 @@ resource "aws_elb" "prod_web" {
 
 resource "aws_launch_template" "prod_web" {
   name_prefix   = "prod-web"
-  image_id      = "ami-06f46154d15644813"
-  instance_type = "t2.micro"
+  image_id      = var.web_image_id
+  instance_type = var.web_instance_type
 
   tags = {
     "Terraform" : "True"
@@ -85,9 +106,9 @@ resource "aws_launch_template" "prod_web" {
 resource "aws_autoscaling_group" "prod_web" {
   availability_zones  = ["us-east-1a","us-east-1b"]
   vpc_zone_identifier = [aws_default_subnet.default_az1.id,aws_default_subnet.default_az2.id] 
-  desired_capacity    = 1
-  max_size            = 2
-  min_size            = 1
+  desired_capacity    = var.web_desired_capacity 
+  max_size            = var.web_max_size
+  min_size            = var.web_min_size
 
   launch_template {
     id      = aws_launch_template.prod_web.id
@@ -104,7 +125,6 @@ resource "aws_autoscaling_attachment" "prod_web" {
   autoscaling_group_name = aws_autoscaling_group.prod_web.id
   elb                    = aws_elb.prod_web.id
 }
-
 
 
 
